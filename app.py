@@ -4,11 +4,19 @@ import logging
 from opentelemetry import trace
 from opentelemetry import metrics
 
+import sys
+import signal
+def handler(signal, frame):
+  print('CTRL-C pressed!')
+  sys.exit(0)
+signal.signal(signal.SIGINT, handler)
+
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 tracer = trace.get_tracer("diceroller.tracer")
 meter = metrics.get_meter("diceroller.meter")
+
 
 roll_counter = meter.create_counter(
     "dice.rolls",
@@ -31,3 +39,6 @@ def roll():
         roll_counter.add(1, {"roll.value": str(res)})
         rollspan.set_attribute("roll.value", res)
         return res
+        
+
+
